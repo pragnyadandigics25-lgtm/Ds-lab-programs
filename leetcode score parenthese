@@ -1,0 +1,54 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX_LEN 1000  // Maximum input length
+
+// Function to compute score of parentheses
+int scoreOfParentheses(const char *s) {
+    int stack[MAX_LEN];
+    int top = -1;
+    int score = 0;
+
+    // Push initial score 0 for the outermost level
+    stack[++top] = 0;
+
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] == '(') {
+            // Start a new score level
+            stack[++top] = 0;
+        } else {
+            // Pop the last score
+            int v = stack[top--];
+            int prev = stack[top];
+            // If v == 0, it was "()", so score is 1
+            // Else, it's "(A)", so score is 2 * v
+            stack[top] = prev + (v == 0 ? 1 : 2 * v);
+        }
+    }
+
+    return stack[top];
+}
+
+int main() {
+    char s[MAX_LEN];
+
+    printf("Enter a balanced parentheses string: ");
+    if (scanf("%s", s) != 1) {
+        printf("Invalid input.\n");
+        return 1;
+    }
+
+    // Validate input: only '(' and ')'
+    for (int i = 0; s[i] != '\0'; i++) {
+        if (s[i] != '(' && s[i] != ')') {
+            printf("Error: Input must contain only '(' and ')'.\n");
+            return 1;
+        }
+    }
+
+    int result = scoreOfParentheses(s);
+    printf("Score: %d\n", result);
+
+    return 0;
+}
