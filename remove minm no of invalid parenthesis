@@ -1,0 +1,93 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+// Function to remove invalid parentheses
+char* minRemoveToMakeValid(const char* s) {
+    if (!s) return NULL;
+
+    int len = strlen(s);
+    char* temp = (char*)malloc(len + 1);
+    if (!temp) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(1);
+    }
+
+    int balance = 0;  // Tracks unmatched '('
+    int idx = 0;
+
+    // First pass: remove extra ')'
+    for (int i = 0; i < len; i++) {
+        if (s[i] == '(') {
+            balance++;
+            temp[idx++] = s[i];
+        } else if (s[i] == ')') {
+            if (balance > 0) {
+                balance--;
+                temp[idx++] = s[i];
+            }
+            // else skip extra ')'
+        } else {
+            temp[idx++] = s[i]; // Keep lowercase letters
+        }
+    }
+    temp[idx] = '\0';
+
+    // Second pass: remove extra '(' from the end
+    char* result = (char*)malloc(idx + 1);
+    if (!result) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        free(temp);
+        exit(1);
+    }
+
+    int writeIdx = idx - 1;
+    balance = 0;
+    for (int i = idx - 1; i >= 0; i--) {
+        if (temp[i] == '(' && balance > 0) {
+            balance--;
+            // skip this '('
+        } else {
+            if (temp[i] == ')') balance++;
+            result[writeIdx--] = temp[i];
+        }
+    }
+
+    // Shift result to start
+    memmove(result, result + writeIdx + 1, idx - writeIdx);
+    result[idx - writeIdx - 1] = '\0';
+
+    free(temp);
+    return result;
+}
+
+int main() {
+    char input[1000];
+
+    printf("Enter a string containing '(', ')' and lowercase letters: ");
+    if (!fgets(input, sizeof(input), stdin)) {
+        printf("Error reading input.\n");
+        return 1;
+    }
+
+    // Remove trailing newline
+    size_t len = strlen(input);
+    if (len > 0 && input[len - 1] == '\n') {
+        input[len - 1] = '\0';
+    }
+
+    // Validate characters
+    for (size_t i = 0; i < strlen(input); i++) {
+        if (!(islower(input[i]) || input[i] == '(' || input[i] == ')')) {
+            printf("Invalid character detected: '%c'\n", input[i]);
+            return 1;
+        }
+    }
+
+    char* validStr = minRemoveToMakeValid(input);
+    printf("Valid string: %s\n", validStr);
+
+    free(validStr);
+    return 0;
+}
